@@ -2,15 +2,36 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 class Pair {
+    int distance;
+    int node;
+
+    Pair(int distance, int node) {
+        this.distance = distance;
+        this.node = node;
+    }
+}
+
+class Pair1 {
     int node;
     int parent;
 
-    public Pair(int node1, int parent1) {
+    public Pair1(int node1, int parent1) {
         this.node = node1;
         this.parent = parent1;
+    }
+}
+
+class PairWordLadder {
+    String first;
+    int second;
+
+    public PairWordLadder(String first1, int second1) {
+        this.first = first1;
+        this.second = second1;
     }
 }
 
@@ -22,8 +43,8 @@ public class master {
     // visited before, mena sits oart of the ycycle
     public static boolean isCycleBFS(int src, int V, ArrayList<ArrayList<Integer>> adj, boolean[] vis) {
         vis[src] = true;
-        Queue<Pair> q = new LinkedList<>();
-        q.add(new Pair(src, -1));
+        Queue<Pair1> q = new LinkedList<>();
+        q.add(new Pair1(src, -1));
 
         while (!q.isEmpty()) {
             int noder = q.peek().node;
@@ -33,7 +54,7 @@ public class master {
             for (Integer i : adj.get(noder)) {
                 if (vis[i] == false) {
                     vis[i] = true;
-                    q.add(new Pair(i, noder));
+                    q.add(new Pair1(i, noder));
                 } else if (par != i) {
                     return true;
                 }
@@ -172,13 +193,6 @@ public class master {
         }
     }
 
-
-
-
-
-
-
-
     // now, lets solve the famous count sistaic islands problem
     public static void CountIslandsDFS(int n, int m, int row, int col, boolean[][] visted, int row0, int col0,
             int[][] grid, ArrayList<String> setter) {
@@ -222,12 +236,6 @@ public class master {
         return set.size();
     }
 
-
-
-
-
-
-
     // bipartite using BFS
     public static boolean isBipartite(int V, ArrayList<ArrayList<Integer>> adj) {
         int[] color = new int[V];
@@ -242,6 +250,7 @@ public class master {
 
         return true;
     }
+
     // BFS utility to check bipartiteness from a given node
     public static boolean bfsCheck(int start, ArrayList<ArrayList<Integer>> adj, int[] color) {
         Queue<Integer> q = new LinkedList<>();
@@ -264,14 +273,6 @@ public class master {
         }
         return true;
     }
-
-
-
-
-
-
-
-
 
     /// bi[partite using DFS
     public static boolean isBipartiteDFS(int V, ArrayList<ArrayList<Integer>> adj) {
@@ -304,29 +305,135 @@ public class master {
         return true;
     }
 
+    // now, lets solve the problem of find a graph is cyclic or not gove that it is
+    // directed
+    public static boolean isCyclicDirectedDFS(int src, int V, ArrayList<ArrayList<Integer>> arr, int[] visited,
+            int[] path) {
+        visited[src] = 1;
+        path[src] = 1;
+        for (Integer i : arr.get(src)) {
+            if (visited[i] == 0) {
+                if (isCyclicDirectedDFS(i, V, arr, visited, path))
+                    return true;
+            } else if (path[i] == 1) {
+                return true;
+            }
 
+        }
+        path[src] = 0;
+        return false;
+    }
 
-
-
-
-
-    // now, lets solve the problem of find a graph is cyclic or not gove  that it is directed
-    public static void isCyclicDirectedDFS(int V, ArrayList<ArrayList<Integer>> arr, int[] visited, int[] path) {}
-    public static isCyclicDirected(int V, ArrayList<ArrayList<Integer>> arr) {
+    public static boolean isCyclicDirected(int V, ArrayList<ArrayList<Integer>> arr) {
         int[] visited = new int[V];
         int[] path = new int[V];
-        for(int i = 0; i < V; i++) {
+        for (int i = 0; i < V; i++) {
             path[i] = 0;
         }
 
-        for(int i = 0; i < V; i++) {
-            if(visited[i] == 0) {
-                isCyclicDirectedDFS(V, arr, visited, path);
+        for (int i = 0; i < V; i++) {
+            if (visited[i] == 0) {
+                if (isCyclicDirectedDFS(i, V, arr, visited, path))
+                    return true;
             }
         }
+        return false;
+    }
+
+    // now, lets do topolocigal sort using BFS(Kahn's algorithm)
+    public static int[] toposort(int V, ArrayList<ArrayList<Integer>> adj) {
+        Queue<Integer> q = new LinkedList<>();
+        int[] indegree = new int[V];
+        for (int i = 0; i < V; i++) {
+            indegree[i] = 0;
+        }
+        for (int i = 0; i < V; i++) {
+            for (Integer j : adj.get(i)) {
+                indegree[j]++;
+            }
+        }
+        for (int i = 0; i < V; i++) {
+            if (indegree[i] == 0) {
+                q.offer(i);
+            }
+        }
+        int[] topo = new int[V];
+        int i = 0;
+        while (!q.isEmpty()) {
+            int node = q.poll();
+            topo[i++] = node;
+            for (Integer it : adj.get(node)) {
+                indegree[it]--;
+                if (indegree[i] == 0) {
+                    q.offer(i);
+                }
+            }
+        }
+        return topo;
+    }
+
+    // now, we shall solve the famous word ladder 1 problem
+    public static int WordLadderLength(String startword, String targetword, String[] wordlist) {
+        HashSet<String> set = new HashSet<>();
+
+        for (int i = 0; i < wordlist.length; i++) {
+            set.add(wordlist[i]);
+        }
+
+        Queue<PairWordLadder> q = new LinkedList<>();
+        q.offer(new PairWordLadder(startword, 1));
+        set.remove(startword);
+        while (!q.isEmpty()) {
+            String worder = q.peek().first;
+            int level = q.peek().second;
+            q.poll();
+            if (worder == targetword)
+                return level;
+            int len = worder.length();
+            for (int i = 0; i < len; i++) {
+                for (char j = 'a'; j <= 'z'; j++) {
+                    char[] array = worder.toCharArray();
+                    array[i] = j;
+                    if (set.contains(array.toString())) {
+                        set.remove(array.toString());
+                        q.add(new PairWordLadder(array.toString(), level + 1));
+                    }
+
+                }
+            }
+        }
+        return 0;
+    }
+
+    // now, writing code to the Dikstra's algorithm to get the minimun distace from
+    // a node
+    public static int[] Dijkstras(int V, ArrayList<ArrayList<ArrayList<Integer>>> adj, int src) {
+        PriorityQueue<Pair> pq = new PriorityQueue<>((a, b) -> a.distance - b.distance);
+        int[] dist = new int[V];
+        Arrays.fill(dist, (int)(1e9));
+        pq.add(new Pair(0, src));
+
+        while(!pq.isEmpty()) {
+            int distance = pq.peek().distance;
+            int node = pq.peek().node;
+            pq.poll();
+            for(int i = 0; i < adj.get(node).size(); i++) {
+                int noder = adj.get(node).get(i).get(0);
+                int weight = adj.get(node).get(i).get(1);
+
+                if(weight + distance < dist[noder]) {
+                    dist[noder] = weight + distance;
+                    pq.add(new Pair(weight, noder));
+                }
+            }
+        }
+        return dist;
     }
 
 
+
+
+    
 
     public static void main(String[] args) {
 
