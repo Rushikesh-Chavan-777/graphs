@@ -298,12 +298,13 @@ public class master {
                 if (!dfsCheck(neighbor, 1 - c, color, adj))
                     return false;
             } else if (color[neighbor] == color[node]) {
-                return false; // Conflict: same color neighbor
+                return false; // Conflict: same color neighbo
             }
         }
 
+
         return true;
-    }
+    }   
 
     // now, lets solve the problem of find a graph is cyclic or not gove that it is
     // directed
